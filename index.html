@@ -45,7 +45,7 @@
 
     <!-- 1. TELA DE LOGIN -->
     <div id="screen-login" class="card">
-        <h3>Acesso v8</h3>
+        <h3>Acesso v9</h3>
         <label>Usuário</label>
         <input type="text" id="login-user" placeholder="Digite seu usuário">
         <label>Senha</label>
@@ -153,37 +153,67 @@
         carregarRomaneios(); // Inicia carga de dados original
     }
 
-    async function cadastrar() {
-        if(enviando) return;
-        const p1 = document.getElementById('reg-pass').value;
-        const p2 = document.getElementById('reg-pass2').value;
-        
-        if(p1 !== p2) return alert("As senhas não coincidem!");
+let processandoCadastro = false;
 
-        enviando = true;
-        const btn = document.getElementById('btn-cadastrar');
+function cadastrar() {
+    if (processandoCadastro) return;
+
+    const nome = document.getElementById('reg-nome').value;
+    const doc = document.getElementById('reg-doc').value;
+    const transp = document.getElementById('reg-transp-list').value;
+    const senha = document.getElementById('reg-pass').value;
+    const senha2 = document.getElementById('reg-pass2').value;
+
+    if (!nome || !doc || !transp || !senha) {
+        return alert("Preencha todos os campos!");
+    }
+
+    if (senha !== senha2) {
+        return alert("As senhas não conferem!");
+    }
+
+    // Bloqueia clique duplo
+    processandoCadastro = true;
+    const btn = document.getElementById('btn-cadastrar');
+    if (btn) {
         btn.disabled = true;
-        btn.innerText = "Cadastrando...";
+        btn.innerText = "Processando...";
+    }
 
-        // Exemplo de integração com seu .gs
-        google.script.run
-            .withSuccessHandler(() => {
-                alert("Cadastrado com sucesso!");
-                location.reload();
-            })
-            .withFailureHandler(() => {
-                alert("Erro ao cadastrar.");
-                enviando = false;
-                btn.disabled = false;
-                btn.innerText = "Cadastrar";
-            })
-            .cadastrarNoSheet({
-                nome: document.getElementById('reg-nome').value,
-                doc: document.getElementById('reg-doc').value,
-                transp: document.getElementById('reg-transp-list').value,
-                pass: p1
-            });
-    }  
+    // Envia os dados via fetch (usando GET para simplificar com Apps Script externo)
+    const url = `${urlSheets}?action=salvarNovoUsuario` +
+                `&nome=${encodeURIComponent(nome)}` +
+                `&documento=${encodeURIComponent(doc)}` +
+                `&transp=${encodeURIComponent(transp)}` +
+                `&senha=${encodeURIComponent(senha)}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                alert("Cadastro realizado com sucesso!");
+                location.reload(); // Recarrega para limpar e voltar ao login
+            } else {
+                alert("Erro ao cadastrar: " + res.error);
+                resetBotaoCadastro();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro na comunicação com o servidor.");
+            resetBotaoCadastro();
+        });
+}
+
+function resetBotaoCadastro() {
+    processandoCadastro = false;
+    const btn = document.getElementById('btn-cadastrar');
+    if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Cadastrar";
+    }
+}
+ 
     let codigosLidos = [];
     let dadosCompletos = []; 
     const urlSheets = "https://script.google.com/macros/s/AKfycbyOkNObww3Q-pnQOWUZM9nJIsXJjwqZRpfbDD8ak3LJ9ORoEia_P5wjjq6dc3ufnVbx/exec"; // Substituir pela sua URL real
