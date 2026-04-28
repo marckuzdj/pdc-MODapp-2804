@@ -45,7 +45,7 @@
 
     <!-- 1. TELA DE LOGIN -->
     <div id="screen-login" class="card">
-        <h3>Acesso v13</h3>
+        <h3>Acesso v14</h3>
         <label>E-mail</label>
         <input type="email" id="login-user" placeholder="seu@email.com">
         <label>Senha</label>
@@ -343,39 +343,41 @@ function popularCombosTransportadora(lista) {
 function atualizarDadosExtras() {
     const romaneioSelect = document.getElementById("romaneio");
     const selectedId = romaneioSelect.value;
-    
-    // Busca o botão pelo ID correto
     const btnIniciar = document.getElementById("btnIniciar");
     
-    // Bloqueio preventivo
     if (btnIniciar) {
         btnIniciar.disabled = true;
+        btnIniciar.style.opacity = "0.5"; // Feedback visual de bloqueio
     }
 
     const info = dadosCompletos.find(r => r.Romaneio === selectedId);
     
     if (info) {
+        // Preenchimento dos campos (Verifique se esses IDs existem no seu HTML)
         document.getElementById("campo_operador").value = info.Operador || "";
         document.getElementById("transp").value = info.Transp || "";
-        document.getElementById("ttpedidos").value = info.TTPedidos || 0;
-        document.getElementById("volumes_total").value = info.TTvols || 0;
+        
+        // Ajuste aqui para os IDs que você colocou no HTML (total_pedidos / total_volumes)
+        const f_pedidos = document.getElementById("total_pedidos");
+        const f_volumes = document.getElementById("total_volumes");
+        
+        if(f_pedidos) f_pedidos.value = info.TTPedidos || 0;
+        if(f_volumes) f_volumes.value = info.TTvols || 0;
 
+        // Validação da Placa
         const placaCorreta = info.Placa ? info.Placa.toString().toUpperCase().replace(/[^A-Z0-9]/g, '') : "";
         const promptResposta = prompt("🔐 VALIDAÇÃO DE SEGURANÇA\nInforme a PLACA do veículo:");
         const placaDigitada = promptResposta ? promptResposta.toUpperCase().replace(/[^A-Z0-9]/g, '') : "";
 
         if (placaDigitada !== "" && placaDigitada === placaCorreta) {
             if (btnIniciar) {
-                btnIniciar.disabled = false; // Desbloqueia o botão
-                btnIniciar.style.opacity = "1" // Remove transparence
-                btnIniciar.style.cursor = "pointer" // Volta o cursor de "mãozinha"
+                btnIniciar.disabled = false;
+                btnIniciar.style.opacity = "1";
+                btnIniciar.style.cursor = "pointer";
             }
             alert("✅ Veículo validado!");
         } else {
-            alert("❌ Acesso Negado!");
-            if (btnIniciar) {
-                btnIniciar.disabled = true;
-            }
+            alert("❌ Placa incorreta ou Acesso Negado!");
             romaneioSelect.value = "";
             limparCamposExtras();
         }
