@@ -45,7 +45,7 @@
 
     <!-- 1. TELA DE LOGIN -->
     <div id="screen-login" class="card">
-        <h3>Acesso v12</h3>
+        <h3>Acesso v13</h3>
         <label>E-mail</label>
         <input type="email" id="login-user" placeholder="seu@email.com">
         <label>Senha</label>
@@ -93,32 +93,44 @@
 
     <!-- 4. TELA PRINCIPAL (CONFERÊNCIA - ORIGINAL) -->
     <div id="screen-main" class="card hidden">
-        <h3 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <h3 style="display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--nu-purple);">
             <img src="https://icons8.com" style="height: 1.2em;">
             Conferência de Carga
         </h3>
         
         <label>Conferente</label>
-        <input type="text" id="usuario" readonly> <!-- Preenchido pelo Login -->
+        <input type="text" id="usuario" readonly style="background: #f0f2f5;"> 
 
         <label>Romaneio</label>
         <select id="romaneio" onchange="atualizarDadosExtras()">
             <option value="">Carregando Romaneios...</option>
         </select>
 
-        <div class="grid-info">
-            <div><label>Transportadora</label><input type="text" id="transp" readonly></div>
-            <div><label>Operador</label><input type="text" id="campo_operador" readonly></div>
+        <!-- Linha 1: Transportadora e Operador -->
+        <div class="grid-info" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+            <div><label>Transportadora</label><input type="text" id="transp" readonly style="background: #f0f2f5;"></div>
+            <div><label>Operador</label><input type="text" id="campo_operador" readonly style="background: #f0f2f5;"></div>
+        </div>
+
+        <!-- NOVO: Linha 2: Totais (Pedidos e Volumes) -->
+        <div class="grid-info" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+            <div><label>Total Pedidos</label><input type="text" id="total_pedidos" readonly style="background: #f0f2f5;"></div>
+            <div><label>Total Volumes</label><input type="text" id="total_volumes" readonly style="background: #f0f2f5;"></div>
         </div>
 
         <div id="reader" style="display: none;"></div>
-        <div id="status-info">Aguardando câmera...</div>
+        <div id="status-info" style="background: #eee; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 10px;">Aguardando câmera...</div>
 
-        <button id="btnIniciar" class="btn btn-primary" onclick="iniciarConferencia()" disabled style="opacity: 0.5; margin-bottom: 10px;">
+        <button id="btnIniciar" class="btn btn-primary" onclick="iniciarConferencia()" style="margin-bottom: 15px;">
             Iniciar Conferência
         </button>
 
-        <div class="lidos-container">
+        <!-- NOVO: Botão Lista de Pendências -->
+        <button class="btn btn-primary" onclick="verificarPendencias()" style="margin-bottom: 20px; background-color: var(--nu-purple);">
+            📋 Lista de Pendências
+        </button>
+
+        <div class="lidos-container" style="border: 1px solid #eee; border-radius: 12px; padding: 12px; background: #fafafa;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <strong>Lidos: <span id="contador" style="color: var(--nu-purple); font-size: 1.2em;">0</span></strong>
                 <button onclick="removerUltimo()" style="background:none; border: 1.5px solid var(--error); color: var(--error); border-radius: 15px; padding: 4px 10px; cursor: pointer; font-size: 11px; font-weight: bold;">✕ REMOVER</button>
