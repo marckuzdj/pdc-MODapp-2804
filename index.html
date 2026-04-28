@@ -45,7 +45,7 @@
 
     <!-- 1. TELA DE LOGIN -->
     <div id="screen-login" class="card">
-        <h3>Acesso v7</h3>
+        <h3>Acesso v8</h3>
         <label>Usuário</label>
         <input type="text" id="login-user" placeholder="Digite seu usuário">
         <label>Senha</label>
@@ -250,21 +250,20 @@ function popularCombosTransportadora(lista) {
 }
 
 
-    // 2. Carregar Transportadoras (Nova integração para os dois Comboboxes)
-    google.script.run.withSuccessHandler(function(lista) {
-        const comboLogin = document.getElementById('login-transp');
-        const comboCadastro = document.getElementById('reg-transp-list');
-        
-        const optionsHtml = '<option value="">Selecione a Transportadora</option>' + 
-                            lista.map(t => `<option value="${t}">${t}</option>`).join('');
-        
-        if (comboLogin) comboLogin.innerHTML = optionsHtml;
-        if (comboCadastro) comboCadastro.innerHTML = optionsHtml;
-        
-    }).withFailureHandler(function(err) {
-        console.error("Erro ao carregar transportadoras:", err);
-    }).getTransportadoras();
-
+    // 2. Carregar Transportadoras (Correção para Frontend Externo)
+    fetch(urlSheets + "?action=getTransportadoras")
+        .then(res => res.json())
+        .then(lista => {
+            const ids = ['login-transp', 'reg-transp-list'];
+            const optionsHtml = '<option value="">Selecione a Transportadora</option>' + 
+                                lista.map(t => `<option value="${t}">${t}</option>`).join('');
+            
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = optionsHtml;
+            });
+        })
+        .catch(err => console.error("Erro ao carregar transportadoras:", err));
 
 
 function atualizarDadosExtras() {
