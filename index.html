@@ -45,7 +45,7 @@
 
     <!-- 1. TELA DE LOGIN -->
     <div id="screen-login" class="card">
-        <h3>Acesso v14</h3>
+        <h3>Acesso v15</h3>
         <label>E-mail</label>
         <input type="email" id="login-user" placeholder="seu@email.com">
         <label>Senha</label>
@@ -397,6 +397,41 @@ function limparCamposExtras() {
     });
 }
 
+function verificarPendencias() {
+    const romaneio = document.getElementById("romaneio").value;
+
+    if (!romaneio) {
+        return alert("⚠️ Por favor, selecione um romaneio primeiro!");
+    }
+
+    // Feedback visual no botão
+    const btn = event.target; // Pega o botão que foi clicado
+    const textoOriginal = btn.innerText;
+    btn.innerText = "Consultando...";
+    btn.disabled = true;
+
+    // Chamada ao backend (usando o fetch que já funciona no seu projeto)
+    fetch(`${urlSheets}?action=verificarPendencias&romaneio=${encodeURIComponent(romaneio)}`)
+        .then(res => res.json())
+        .then(pendencias => {
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+
+            if (pendencias.length === 0) {
+                alert("✅ Tudo OK! Não há pendências para este romaneio.");
+            } else {
+                // Formata a lista para exibir ao usuário
+                const listaFormatada = pendencias.map(p => `- ${p}`).join('\n');
+                alert("📋 ITENS PENDENTES:\n\n" + listaFormatada);
+            }
+        })
+        .catch(err => {
+            console.error("Erro ao verificar pendências:", err);
+            alert("❌ Erro ao consultar pendências.");
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+        });
+}
 
 
 async function mostrarPendencias() {
