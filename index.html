@@ -61,8 +61,14 @@
         <label>Senha</label>
         <input type="password" id="loginSenha" placeholder="••••••••">
         <label>Transportadora</label>
+        <!-- No combo de Login -->
         <select id="loginTransportadora">
             <option value="">Selecione a Transportadora</option>
+            <? if (typeof listaTransportadoras !== 'undefined') { 
+                 for (var i = 0; i < listaTransportadoras.length; i++) { ?>
+                   <option value="<?= listaTransportadoras[i] ?>"><?= listaTransportadoras[i] ?></option>
+            <?   } 
+               } ?>
         </select>
         <button class="btn btn-success" onclick="logar()">Entrar</button>
         <div style="text-align: center; margin-top: 20px;">
@@ -89,8 +95,14 @@
         <label>Documento</label>
         <input type="text" id="cadDoc" placeholder="CPF ou CNPJ">
         <label>Transportadora</label>
+        <!-- No combo de Cadastro -->
         <select id="cadTransp">
             <option value="">Selecione...</option>
+            <? if (typeof listaTransportadoras !== 'undefined') { 
+                 for (var i = 0; i < listaTransportadoras.length; i++) { ?>
+                   <option value="<?= listaTransportadoras[i] ?>"><?= listaTransportadoras[i] ?></option>
+            <?   } 
+               } ?>
         </select>
         <label>Senha</label>
         <input type="password" id="cadSenha" placeholder="Crie uma senha">
