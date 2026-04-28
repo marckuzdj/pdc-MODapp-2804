@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>APP VIVO: Passagem de Carga</title>
-    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         :root {
             --nu-purple: #820ad1;
@@ -15,130 +15,248 @@
             --error: #e63946;
             --success: #2b9348;
         }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body { 
             font-family: 'Inter', -apple-system, sans-serif; 
-            margin: 0; padding: 12px; background: var(--nu-gray); color: var(--nu-text); line-height: 1.4;
+            margin: 0; 
+            padding: 12px; 
+            background: var(--nu-gray); 
+            color: var(--nu-text);
+            line-height: 1.4;
         }
+
         .card { 
-            background: white; padding: 20px; border-radius: 20px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 500px; margin: auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            max-width: 500px; 
+            margin: auto; 
         }
-        h3 { color: var(--nu-purple); font-weight: 700; margin: 0 0 20px 0; font-size: 1.4rem; text-align: center; }
+
+        h3 { 
+            color: var(--nu-purple); 
+            font-weight: 700; 
+            margin: 0 0 20px 0;
+            font-size: 1.4rem;
+        }
+
         label { 
-            font-size: 12px; color: var(--nu-purple); font-weight: 700; 
-            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;
+            font-size: 12px; 
+            color: var(--nu-purple); 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: block;
         }
+
         input, select { 
-            width: 100%; height: 52px; padding: 0 16px; margin-bottom: 16px; 
-            border: 1px solid #ddd; border-radius: 12px; font-size: 16px; background: #fff;
+            width: 100%; 
+            height: 52px; /* Altura ideal para toque */
+            padding: 0 16px; 
+            margin-bottom: 16px; 
+            border: 1px solid #ddd; 
+            border-radius: 12px; 
+            font-size: 16px; /* Evita zoom automático no iOS */
+            background: #fff;
+            transition: all 0.2s ease;
         }
-        input:focus { outline: none; border-color: var(--nu-purple); box-shadow: 0 0 0 2px rgba(130, 10, 209, 0.1); }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--nu-purple);
+            box-shadow: 0 0 0 2px rgba(130, 10, 209, 0.1);
+        }
+
+        input[readonly] { 
+            background-color: #f9f9f9; 
+            color: var(--nu-text-light); 
+            border-color: #eee;
+        }
+
+        .grid-info { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+        }
+
+        #reader {
+            width: 100% !important; /* Força a largura total do container pai */
+            max-width: 600px;       /* Limite opcional para não ficar gigante em tablets */
+            margin: 0 auto;
+            border-radius: 8px;
+            overflow: hidden;       /* Garante que a câmera respeite as bordas arredondadas */
+            border: none !important; /* Remove bordas padrão se desejar um visual limpo */
+        }
+
+          /* Ajusta o vídeo interno gerado pela biblioteca */
+        #reader video {
+            width: 100% !important;
+            height: auto !important;
+            object-fit: cover;     /* Faz a câmera preencher o espaço sem distorcer */
+        }      
+        
         .btn { 
-            width: 100%; height: 56px; border: none; border-radius: 28px; 
-            font-weight: 700; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+            width: 100%; 
+            height: 56px;
+            border: none; 
+            border-radius: 28px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: transform 0.1s, background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn-success { background: var(--nu-purple); color: white; margin-top: 10px; }
-        .btn-success:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-warning { background: #fff; color: var(--error); border: 1.5px solid var(--error); height: 36px; font-size: 13px; padding: 0 15px; border-radius: 18px; width: auto; }
-        .btn-link { background: none; border: none; color: var(--nu-purple); cursor: pointer; font-size: 14px; text-decoration: none; margin-top: 10px; }
-        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        #status-info { padding: 10px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 15px; background: #eee; }
-        .lidos-container { border: 1px solid #eee; border-radius: 12px; padding: 12px; background: #fafafa; margin-bottom: 15px; }
-        #itens-lidos { max-height: 150px; overflow-y: auto; margin-top: 10px; }
-        .item-codigo { background: white; padding: 10px; margin-bottom: 6px; border-radius: 8px; display: flex; justify-content: space-between; font-size: 14px; border: 1px solid #eee; }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-success { background: var(--nu-purple); color: white; margin-top: 15px; }
+        .btn-success:disabled { background: #ccc; }
+
+        .btn-warning { 
+            background: #fff; 
+            color: var(--error); 
+            border: 1.5px solid var(--error);
+            height: 36px;
+            font-size: 13px;
+            padding: 0 15px;
+            border-radius: 18px;
+            width: auto;
+        }
+
+        #status-info { 
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px; 
+            text-align: center; 
+            margin-bottom: 15px;
+            font-weight: 500;
+            background: #eee;
+        }
+
+        .lidos-container {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 12px;
+            background: #fafafa;
+        }
+
+        #itens-lidos { 
+            max-height: 180px; 
+            overflow-y: auto; 
+            margin-top: 10px;
+        }
+
+        .item-codigo { 
+            background: white; 
+            padding: 10px 14px; 
+            margin-bottom: 6px; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 14px; 
+            border: 1px solid #eee;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
         #contador { color: var(--nu-purple); font-size: 20px; font-weight: 800; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- TELA 1: LOGIN -->
-    <div id="telaLogin" class="card">
-        <h3>Acesso ao Sistema</h3>
-        <label>Usuário</label>
-        <input type="text" id="loginUsuario" placeholder="Seu E-mail">
-        <label>Senha</label>
-        <input type="password" id="loginSenha" placeholder="••••••••">
-        <label>Transportadora</label>
-        <!-- No combo de Login -->
-        <select id="loginTransportadora">
-            <option value="">Selecione a Transportadora</option>
-            <? if (typeof listaTransportadoras !== 'undefined') { 
-                 for (var i = 0; i < listaTransportadoras.length; i++) { ?>
-                   <option value="<?= listaTransportadoras[i] ?>"><?= listaTransportadoras[i] ?></option>
-            <?   } 
-               } ?>
-        </select>
-        <button class="btn btn-success" onclick="logar()">Entrar</button>
-        <div style="text-align: center; margin-top: 20px;">
-            <button class="btn-link" onclick="navegar('telaRecuperar')">Esqueci minha senha</button>
-            <p style="font-size: 14px;">Não tem senha? <b style="color:var(--nu-purple); cursor:pointer" onclick="navegar('telaCadastro')">Cadastre-se...</b></p>
+    <div class="card">
+    <h3 style="text-align:center; display: flex; align-items: center; justify-content: center; gap: 10px; color: #6a1b9a;">
+    <img src="" 
+         alt="Ícone" 
+         style="height: 1.2em; width: auto; display: inline-block; vertical-align: middle;">
+         Conferencia de Carga
+    </h3>
+
+    <label for="usuario">Conferente</label>
+    <input type="text" id="usuario" placeholder="Ex: João Silva">
+    
+    <label for="romaneio">Romaneio</label>
+    <select id="romaneio" onchange="atualizarDadosExtras()">
+        <option value="">Carregando Romaneios...</option>
+    </select>
+
+    <div class="grid-info">
+        <div>
+            <label>Transportadora</label>
+            <input type="text" id="transp" readonly>
+        </div>
+        <div>
+            <label>Operador</label>
+            <input type="text" id="campo_operador" readonly>
         </div>
     </div>
 
-    <!-- TELA 2: RECUPERAR SENHA -->
-    <div id="telaRecuperar" class="card hidden">
-        <h3>Recuperar Senha</h3>
-        <p style="text-align:center; font-size:14px; color:var(--nu-text-light)">Enviaremos instruções para o seu e-mail.</p>
-        <label>E-mail</label>
-        <input type="email" id="recuperarEmail" placeholder="seuemail@empresa.com">
-        <button class="btn btn-success" onclick="recuperarSenha()">Recuperar Senha</button>
-        <button class="btn-link" style="width:100%" onclick="navegar('telaLogin')">← Voltar ao Login</button>
+    <div class="grid-info">
+        <div>
+            <label>Total Pedidos</label>
+            <input type="text" id="ttpedidos" readonly>
+        </div>
+        <div>
+            <label>Total Volumes</label>
+            <input type="number" id="volumes_total" readonly>
+        </div>
     </div>
 
-    <!-- TELA 3: CADASTRO -->
-    <div id="telaCadastro" class="card hidden">
-        <h3>Novo Cadastro</h3>
-        <label>Nome Completo</label>
-        <input type="text" id="cadNome" placeholder="Ex: João Silva">
-        <label>Documento</label>
-        <input type="text" id="cadDoc" placeholder="RG">
-        <label>Transportadora</label>
-        <!-- No combo de Cadastro -->
-        <select id="cadTransp">
-            <option value="">Selecione...</option>
-            <? if (typeof listaTransportadoras !== 'undefined') { 
-                 for (var i = 0; i < listaTransportadoras.length; i++) { ?>
-                   <option value="<?= listaTransportadoras[i] ?>"><?= listaTransportadoras[i] ?></option>
-            <?   } 
-               } ?>
-        </select>
-        <label>Senha</label>
-        <input type="password" id="cadSenha" placeholder="Crie uma senha">
-        <label>Repita a Senha</label>
-        <input type="password" id="cadSenhaConf" placeholder="Confirme a senha">
-        <button id="btnCadastrar" class="btn btn-success" onclick="cadastrarUsuario()">Cadastrar</button>
-        <button class="btn-link" style="width:100%" onclick="navegar('telaLogin')">Já tenho conta</button>
+       <!-- Botão para iniciar cam -->
+    <div style="display: flex; justify-content: center; width: 100%; margin: 15px 0;">
+        <button id="btnIniciar" onclick="iniciarConferencia()" disabled
+            style="
+                background-color: #820ad1; 
+                color: white; 
+                border: none; 
+                padding: 10px 30px; 
+                border-radius: 20px; 
+                font-weight: bold; 
+                cursor: pointer;
+                width: auto;      /* Faz o botão se ajustar ao texto */
+                min-width: 180px; /* Garante um tamanho mínimo elegante */
+                 /* Novos estilos para o estado bloqueado */
+                opacity: 0.5; 
+                cursor: not-allowed;
+                transition: opacity 0.3s; /* Deixa a transição mais suave */
+            ">
+            Iniciar Conferência
+        </button>
     </div>
-
-    <!-- TELA 4: CONFERÊNCIA (SUA TELA ORIGINAL) -->
-    <div id="telaPrincipal" class="card hidden">
-        <h3>Conferencia de Carga</h3>
         
-        <label>Conferente</label>
-        <input type="text" id="usuario" readonly> <!-- Preenchido pelo login -->
+     <!-- Container da câmera (escondido inicialmente) -->
+    <!-- Substitua por esta linha -->
+    <div id="reader" style="display: none; width: 100%; max-width: 500px; margin: 0 auto; border-radius: 8px; overflow: hidden;"></div>
+    <div id="status-info">Aguardando câmera...</div>
 
-        <label>Romaneio</label>
-        <select id="romaneio" onchange="atualizarDadosExtras()">
-            <option value="">Selecione o Romaneio</option>
-        </select>
+    <div style="display: flex; justify-content: center; width: 100%; margin: 10px 0;">
+        <button id="btnPendencias" onclick="mostrarPendencias()" 
+            style="
+                width: 80%;
+                max-width: 250px;
+                padding: 12px;
+                background-color: #820ad1; /* Roxo Nubank */
+                color: #ffffff;
+                border: none;
+                border-radius: 25px;       /* Estilo pílula igual ao outro */
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(130, 10, 209, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            ">
+            📋 Lista de Pendências
+        </button>
+    </div>
 
-        <div class="grid-info">
-            <div><label>Transportadora</label><input type="text" id="transp" readonly></div>
-            <div><label>Operador</label><input type="text" id="campo_operador" readonly></div>
-        </div>
-        <div class="grid-info">
-            <div><label>Total Pedidos</label><input type="text" id="ttpedidos" readonly></div>
-            <div><label>Total Volumes</label><input type="number" id="volumes_total" readonly></div>
-        </div>
-
-        <button id="btnIniciar" class="btn btn-success" onclick="iniciarConferencia()" disabled style="opacity:0.5; margin: 15px 0;">Iniciar Conferência</button>
-        
-        <div id="reader" class="hidden" style="width:100%; border-radius:8px; overflow:hidden; margin-bottom:10px;"></div>
-        <div id="status-info">Aguardando câmera...</div>
-
-        <button id="btnPendencias" class="btn btn-success" style="height:45px; margin-bottom:15px;" onclick="mostrarPendencias()">Lista de Pendências</button>
 
         <div class="lidos-container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -147,62 +265,71 @@
             </div>
             <div id="itens-lidos"></div>
         </div>
-
+    
         <button class="btn btn-success" onclick="finalizarLote()">Finalizar Lote</button>
-        
-        <div id="areaAssinatura" class="hidden" style="margin-top:15px; text-align:center;">
-            <label>Assine aqui:</label>
-            <canvas id="canvasAssinatura" width="300" height="150" style="border:1px solid #000; background:#fff; border-radius:8px;"></canvas>
-            <button class="btn-link" onclick="limparAssinatura()">Limpar Assinatura</button>
-        </div>
+    </div>
+
+    <!-- Campo de Assinatura inicialmente oculto -->
+    <div id="areaAssinatura" style="display: none; margin-top: 15px; text-align: center;">
+        <label><b>✍️ Assine aqui:</b></label><br>
+        <canvas id="canvasAssinatura" width="300" height="150" 
+                style="border: 2px solid #000; background: #fff; border-radius: 8px; touch-action: none;"></canvas>
+        <br>
+        <button type="button" class="btn btn-sm btn-link" onclick="limparAssinatura()">Limpar Assinatura</button>
     </div>
   
 <script>
+      // --- LÓGICA DE NAVEGAÇÃO E CADASTRO ---
+    let enviando = false;
 
-         // --- LÓGICA DE NAVEGAÇÃO E NOVAS TELAS ---
-        function navegar(id) {
-            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
+    function showScreen(id) {
+        document.querySelectorAll('.card').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
 
-        function logar() {
-            const user = document.getElementById('loginUsuario').value;
-            if(!user) return alert("Digite o usuário");
-            document.getElementById('usuario').value = user;
-            navegar('telaPrincipal');
-        }
+    function realizarLogin() {
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        
+        if(!user || !pass) return alert("Preencha usuário e senha.");
 
-        let cadastrando = false;
-        async function cadastrarUsuario() {
-            if(cadastrando) return;
-            const btn = document.getElementById('btnCadastrar');
-            
-            // Validação simples de senha
-            if(document.getElementById('cadSenha').value !== document.getElementById('cadSenhaConf').value) {
-                return alert("Senhas não coincidem!");
-            }
+        // Simulando sucesso e passando o nome para a tela principal
+        document.getElementById('usuario').value = user;
+        showScreen('screen-main');
+        carregarRomaneios(); // Inicia carga de dados original
+    }
 
-            cadastrando = true;
-            btn.disabled = true;
-            btn.innerText = "Cadastrando...";
-            
-            // Simulação de delay de rede
-            setTimeout(() => {
-                alert("Usuário cadastrado com sucesso!");
-                cadastrando = false;
+    async function cadastrar() {
+        if(enviando) return;
+        const p1 = document.getElementById('reg-pass').value;
+        const p2 = document.getElementById('reg-pass2').value;
+        
+        if(p1 !== p2) return alert("As senhas não coincidem!");
+
+        enviando = true;
+        const btn = document.getElementById('btn-cadastrar');
+        btn.disabled = true;
+        btn.innerText = "Cadastrando...";
+
+        // Exemplo de integração com seu .gs
+        google.script.run
+            .withSuccessHandler(() => {
+                alert("Cadastrado com sucesso!");
+                location.reload();
+            })
+            .withFailureHandler(() => {
+                alert("Erro ao cadastrar.");
+                enviando = false;
                 btn.disabled = false;
                 btn.innerText = "Cadastrar";
-                navegar('telaLogin');
-            }, 2000);
-        }
-
-        function recuperarSenha() {
-            alert("Se o e-mail existir na base, você receberá um link de recuperação.");
-            navegar('telaLogin');
-        }
-
-        // --- SUA LÓGICA ORIGINAL (MANTIDA) ---  
-    
+            })
+            .cadastrarNoSheet({
+                nome: document.getElementById('reg-nome').value,
+                doc: document.getElementById('reg-doc').value,
+                transp: document.getElementById('reg-transp-list').value,
+                pass: p1
+            });
+    }  
     let codigosLidos = [];
     let dadosCompletos = []; 
     const urlSheets = "https://script.google.com/macros/s/AKfycbyOkNObww3Q-pnQOWUZM9nJIsXJjwqZRpfbDD8ak3LJ9ORoEia_P5wjjq6dc3ufnVbx/exec"; // Substituir pela sua URL real
@@ -211,92 +338,23 @@
     const somErro = new Audio('https://mixkit.co');
 
 window.onload = function() {
-    // 1. CARREGAR ROMANEIOS (Sua lógica original)
     fetch(urlSheets + "?action=getRomaneios")
         .then(res => res.json())
         .then(data => {
-            dadosCompletos = data;
-            const selectRom = document.getElementById("romaneio");
-            if (selectRom) {
-                selectRom.innerHTML = '<option value="">Selecione o Romaneio</option>';
-                data.forEach(item => {
-                    if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
-                        let opt = document.createElement("option");
-                        opt.value = item.Romaneio;
-                        opt.innerHTML = item.Romaneio;
-                        selectRom.appendChild(opt);
-                    }
-                });
-            }
+            dadosCompletos = data; // Salva para uso no atualizarDadosExtras
+            const select = document.getElementById("romaneio");
+            select.innerHTML = '<option value="">Selecione o Romaneio</option>';
+
+            data.forEach(item => {
+                if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
+                    let opt = document.createElement("option");
+                    opt.value = item.Romaneio;
+                    opt.innerHTML = item.Romaneio;
+                    select.appendChild(opt);
+                }
+            });
         });
-
-    // 2. CARREGAR TRANSPORTADORAS (Nova lógica)
-    fetch(urlSheets + "?action=getTransportadoras")
-        .then(res => res.json())
-        .then(lista => {
-            // IDs dos campos que devem ser preenchidos
-            const ids = ['loginTransportadora', 'cadTransp'];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.innerHTML = '<option value="">Selecione a Transportadora</option>';
-                    lista.forEach(nome => {
-                        let opt = document.createElement('option');
-                        opt.value = nome;
-                        opt.textContent = nome;
-                        el.appendChild(opt);
-                    });
-                }
-            });
-        })
-        .catch(err => console.error("Erro nas transportadoras:", err));
 };
-
-
-    // 2. CARREGAR TRANSPORTADORAS (Nova lógica para Login e Cadastro)
-    fetch(urlSheets + "?action=getTransportadoras")
-        .then(res => res.json())
-        .then(lista => {
-            const IDsParaPreencher = ['loginTransportadora', 'cadTransp'];
-            IDsParaPreencher.forEach(id => {
-                const selectEl = document.getElementById(id);
-                if (selectEl) {
-                    selectEl.innerHTML = '<option value="">Selecione a Transportadora</option>';
-                    lista.forEach(nome => {
-                        let opt = document.createElement('option');
-                        opt.value = nome;
-                        opt.textContent = nome;
-                        selectEl.appendChild(opt);
-                    });
-                }
-            });
-        })
-        .catch(err => console.error("Erro ao carregar transportadoras:", err));
-};
-
-    
-        // 2. Carrega as Transportadoras (Via google.script.run para evitar bloqueio CORS)
-        if (typeof google !== 'undefined' && google.script) {
-            google.script.run
-                .withSuccessHandler(function(lista) {
-                    const ids = ['loginTransportadora', 'cadTransp'];
-                    ids.forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) {
-                            el.innerHTML = '<option value="">Selecione a Transportadora</option>';
-                            lista.forEach(transp => {
-                                let opt = document.createElement('option');
-                                opt.value = transp;
-                                opt.innerHTML = transp;
-                                el.appendChild(opt);
-                            });
-                        }
-                    });
-                })
-                .getTransportadorasAPI();
-        }
-    };
-
 
 function atualizarDadosExtras() {
     const romaneioSelect = document.getElementById("romaneio");
