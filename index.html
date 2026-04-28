@@ -45,7 +45,7 @@
 
     <!-- 1. TELA DE LOGIN -->
     <div id="screen-login" class="card">
-        <h3>Acesso v9</h3>
+        <h3>Acesso v10</h3>
         <label>Usuário</label>
         <input type="text" id="login-user" placeholder="Digite seu usuário">
         <label>Senha</label>
@@ -75,10 +75,14 @@
         <input type="text" id="reg-nome">
         <label>Documento</label>
         <input type="text" id="reg-doc">
+        <label>E-mail</label>
+        <input type="email" id="reg-email" placeholder="seu@email.com">
+        
         <label>Transportadora</label>
         <select id="reg-transp-list">
             <option value="">Selecione...</option>
         </select>
+        
         <label>Senha</label>
         <input type="password" id="reg-pass">
         <label>Repita a Senha</label>
@@ -155,35 +159,32 @@
 
 let processandoCadastro = false;
 
-function cadastrar() {
+    function cadastrar() {
     if (processandoCadastro) return;
 
     const nome = document.getElementById('reg-nome').value;
     const doc = document.getElementById('reg-doc').value;
+    const email = document.getElementById('reg-email').value; // Novo campo
     const transp = document.getElementById('reg-transp-list').value;
     const senha = document.getElementById('reg-pass').value;
     const senha2 = document.getElementById('reg-pass2').value;
 
-    if (!nome || !doc || !transp || !senha) {
+    if (!nome || !doc || !email || !transp || !senha) {
         return alert("Preencha todos os campos!");
     }
 
-    if (senha !== senha2) {
-        return alert("As senhas não conferem!");
-    }
+    if (senha !== senha2) return alert("As senhas não conferem!");
 
-    // Bloqueia clique duplo
     processandoCadastro = true;
     const btn = document.getElementById('btn-cadastrar');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerText = "Processando...";
-    }
+    btn.disabled = true;
+    btn.innerText = "Processando...";
 
-    // Envia os dados via fetch (usando GET para simplificar com Apps Script externo)
+    // Adicionado e-mail na URL
     const url = `${urlSheets}?action=salvarNovoUsuario` +
                 `&nome=${encodeURIComponent(nome)}` +
                 `&documento=${encodeURIComponent(doc)}` +
+                `&email=${encodeURIComponent(email)}` + 
                 `&transp=${encodeURIComponent(transp)}` +
                 `&senha=${encodeURIComponent(senha)}`;
 
@@ -192,15 +193,14 @@ function cadastrar() {
         .then(res => {
             if (res.success) {
                 alert("Cadastro realizado com sucesso!");
-                location.reload(); // Recarrega para limpar e voltar ao login
+                location.reload();
             } else {
-                alert("Erro ao cadastrar: " + res.error);
+                alert("Erro: " + res.error);
                 resetBotaoCadastro();
             }
         })
         .catch(err => {
-            console.error(err);
-            alert("Erro na comunicação com o servidor.");
+            alert("Erro na comunicação.");
             resetBotaoCadastro();
         });
 }
