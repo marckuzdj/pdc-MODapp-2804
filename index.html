@@ -45,7 +45,7 @@
 
     <!-- 1. TELA DE LOGIN -->
     <div id="screen-login" class="card">
-        <h3>Acesso v3</h3>
+        <h3>Acesso v4</h3>
         <label>Usuário</label>
         <input type="text" id="login-user" placeholder="Digite seu usuário">
         <label>Senha</label>
@@ -192,7 +192,7 @@
     const somErro = new Audio('https://mixkit.co');
 
 window.onload = function() {
-    // 1. Carregar Romaneios (Fetch original)
+    // 1. Carregar Romaneios
     fetch(urlSheets + "?action=getRomaneios")
         .then(res => res.json())
         .then(data => {
@@ -212,7 +212,7 @@ window.onload = function() {
         })
         .catch(err => console.error("Erro Romaneios:", err));
 
-    // 2. Carregar Transportadoras (Fetch para os dois Combos)
+    // 2. Carregar Transportadoras
     fetch(urlSheets + "?action=getTransportadoras")
         .then(res => res.json())
         .then(lista => {
@@ -226,14 +226,8 @@ window.onload = function() {
             });
         })
         .catch(err => console.error("Erro Transportadoras:", err));
-}; // <-- Certifique-se que este fechamento existe e é o ÚNICO para o window.onload
+}; // FIM DO ONLOAD - Certifique-se de que NÃO HÁ nada como }); ou } logo abaixo desta linha.
 
-    // 2. Carregar Transportadoras (JSONP para Frontend Externo)
-    // Criamos um script dinâmico para evitar bloqueio de segurança do navegador
-    const scriptTransp = document.createElement('script');
-    scriptTransp.src = urlSheets + "?action=getTransportadoras&callback=popularCombosTransportadora";
-    document.body.appendChild(scriptTransp);
-};
 
 /**
  * Função de Callback chamada automaticamente pelo Google
