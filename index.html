@@ -191,8 +191,8 @@
     const somSucesso = new Audio('https://mixkit.co');
     const somErro = new Audio('https://mixkit.co');
 
-    window.onload = function() {
-    // 1. Carregar Romaneios (Sua função original preservada)
+window.onload = function() {
+    // 1. Carregar Romaneios (Sua função original com Fetch)
     fetch(urlSheets + "?action=getRomaneios")
         .then(res => res.json())
         .then(data => {
@@ -211,6 +211,34 @@
             }
         })
         .catch(err => console.error("Erro ao carregar romaneios:", err));
+
+    // 2. Carregar Transportadoras (JSONP para Frontend Externo)
+    // Criamos um script dinâmico para evitar bloqueio de segurança do navegador
+    const scriptTransp = document.createElement('script');
+    scriptTransp.src = urlSheets + "?action=getTransportadoras&callback=popularCombosTransportadora";
+    document.body.appendChild(scriptTransp);
+};
+
+/**
+ * Função de Callback chamada automaticamente pelo Google
+ * preenche os dois comboboxes (Login e Cadastro)
+ */
+function popularCombosTransportadora(lista) {
+    const idsCombos = ['login-transp', 'reg-transp-list'];
+    
+    const optionsHtml = '<option value="">Selecione a Transportadora</option>' + 
+                        lista.map(t => `<option value="${t}">${t}</option>`).join('');
+
+    idsCombos.forEach(id => {
+        const combo = document.getElementById(id);
+        if (combo) {
+            combo.innerHTML = optionsHtml;
+        }
+    });
+    
+    console.log("Transportadoras carregadas com sucesso.");
+}
+
 
     // 2. Carregar Transportadoras (Nova integração para os dois Comboboxes)
     google.script.run.withSuccessHandler(function(lista) {
