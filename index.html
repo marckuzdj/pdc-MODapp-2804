@@ -191,24 +191,43 @@
     const somSucesso = new Audio('https://mixkit.co');
     const somErro = new Audio('https://mixkit.co');
 
-window.onload = function() {
+    window.onload = function() {
+    // 1. Carregar Romaneios (Sua função original preservada)
     fetch(urlSheets + "?action=getRomaneios")
         .then(res => res.json())
         .then(data => {
-            dadosCompletos = data; // Salva para uso no atualizarDadosExtras
+            dadosCompletos = data; 
             const select = document.getElementById("romaneio");
-            select.innerHTML = '<option value="">Selecione o Romaneio</option>';
+            if (select) {
+                select.innerHTML = '<option value="">Selecione o Romaneio</option>';
+                data.forEach(item => {
+                    if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
+                        let opt = document.createElement("option");
+                        opt.value = item.Romaneio;
+                        opt.innerHTML = item.Romaneio;
+                        select.appendChild(opt);
+                    }
+                });
+            }
+        })
+        .catch(err => console.error("Erro ao carregar romaneios:", err));
 
-            data.forEach(item => {
-                if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
-                    let opt = document.createElement("option");
-                    opt.value = item.Romaneio;
-                    opt.innerHTML = item.Romaneio;
-                    select.appendChild(opt);
-                }
-            });
-        });
+    // 2. Carregar Transportadoras (Nova integração para os dois Comboboxes)
+    google.script.run.withSuccessHandler(function(lista) {
+        const comboLogin = document.getElementById('login-transp');
+        const comboCadastro = document.getElementById('reg-transp-list');
+        
+        const optionsHtml = '<option value="">Selecione a Transportadora</option>' + 
+                            lista.map(t => `<option value="${t}">${t}</option>`).join('');
+        
+        if (comboLogin) comboLogin.innerHTML = optionsHtml;
+        if (comboCadastro) comboCadastro.innerHTML = optionsHtml;
+        
+    }).withFailureHandler(function(err) {
+        console.error("Erro ao carregar transportadoras:", err);
+    }).getTransportadoras();
 };
+
 
 function atualizarDadosExtras() {
     const romaneioSelect = document.getElementById("romaneio");
