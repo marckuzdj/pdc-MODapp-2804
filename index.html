@@ -192,7 +192,7 @@
     const somErro = new Audio('https://mixkit.co');
 
 window.onload = function() {
-    // 1. Carregar Romaneios (Sua função original com Fetch)
+    // 1. Carregar Romaneios (Seu código que já funciona)
     fetch(urlSheets + "?action=getRomaneios")
         .then(res => res.json())
         .then(data => {
@@ -210,7 +210,27 @@ window.onload = function() {
                 });
             }
         })
-        .catch(err => console.error("Erro ao carregar romaneios:", err));
+        .catch(err => console.error("Erro Romaneios:", err));
+
+    // 2. Carregar Transportadoras (Mesma lógica do fetch que funciona)
+    fetch(urlSheets + "?action=getTransportadoras")
+        .then(res => res.json())
+        .then(lista => {
+            const ids = ['login-transp', 'reg-transp-list'];
+            const options = '<option value="">Selecione a Transportadora</option>' + 
+                            lista.map(t => `<option value="${t}">${t}</option>`).join('');
+            
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = options;
+            });
+        })
+        .catch(err => {
+            console.error("Erro Transportadoras:", err);
+            document.getElementById('login-transp').innerHTML = '<option>Erro ao carregar</option>';
+        });
+};
+
 
     // 2. Carregar Transportadoras (JSONP para Frontend Externo)
     // Criamos um script dinâmico para evitar bloqueio de segurança do navegador
