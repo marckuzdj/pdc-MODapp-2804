@@ -198,24 +198,48 @@
     const somSucesso = new Audio('https://mixkit.co');
     const somErro = new Audio('https://mixkit.co');
 
-window.onload = function() {
-    fetch(urlSheets + "?action=getRomaneios")
-        .then(res => res.json())
-        .then(data => {
-            dadosCompletos = data; // Salva para uso no atualizarDadosExtras
-            const select = document.getElementById("romaneio");
-            select.innerHTML = '<option value="">Selecione o Romaneio</option>';
+    window.onload = function() {
+        // 1. Carrega os Romaneios (Via Fetch - Sua lógica atual)
+        fetch(urlSheets + "?action=getRomaneios")
+            .then(res => res.json())
+            .then(data => {
+                dadosCompletos = data;
+                const select = document.getElementById("romaneio");
+                select.innerHTML = '<option value="">Selecione o Romaneio</option>';
+    
+                data.forEach(item => {
+                    if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
+                        let opt = document.createElement("option");
+                        opt.value = item.Romaneio;
+                        opt.innerHTML = item.Romaneio;
+                        select.appendChild(opt);
+                    }
+                });
+            })
+            .catch(err => console.error("Erro nos romaneios:", err));
+    
+        // 2. Carrega as Transportadoras (Via google.script.run para evitar bloqueio CORS)
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run
+                .withSuccessHandler(function(lista) {
+                    const ids = ['loginTransportadora', 'cadTransp'];
+                    ids.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.innerHTML = '<option value="">Selecione a Transportadora</option>';
+                            lista.forEach(transp => {
+                                let opt = document.createElement('option');
+                                opt.value = transp;
+                                opt.innerHTML = transp;
+                                el.appendChild(opt);
+                            });
+                        }
+                    });
+                })
+                .getTransportadorasAPI();
+        }
+    };
 
-            data.forEach(item => {
-                if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
-                    let opt = document.createElement("option");
-                    opt.value = item.Romaneio;
-                    opt.innerHTML = item.Romaneio;
-                    select.appendChild(opt);
-                }
-            });
-        });
-};
 
 function atualizarDadosExtras() {
     const romaneioSelect = document.getElementById("romaneio");
