@@ -211,11 +211,11 @@
     const somErro = new Audio('https://mixkit.co');
 
 window.onload = function() {
-    // 1. CARREGAR ROMANEIOS (Sua lógica original que já funcionava)
+    // 1. CARREGAR ROMANEIOS (Sua lógica original)
     fetch(urlSheets + "?action=getRomaneios")
         .then(res => res.json())
         .then(data => {
-            dadosCompletos = data; // Salva para uso no app
+            dadosCompletos = data;
             const selectRom = document.getElementById("romaneio");
             if (selectRom) {
                 selectRom.innerHTML = '<option value="">Selecione o Romaneio</option>';
@@ -228,8 +228,30 @@ window.onload = function() {
                     }
                 });
             }
+        });
+
+    // 2. CARREGAR TRANSPORTADORAS (Nova lógica)
+    fetch(urlSheets + "?action=getTransportadoras")
+        .then(res => res.json())
+        .then(lista => {
+            // IDs dos campos que devem ser preenchidos
+            const ids = ['loginTransportadora', 'cadTransp'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = '<option value="">Selecione a Transportadora</option>';
+                    lista.forEach(nome => {
+                        let opt = document.createElement('option');
+                        opt.value = nome;
+                        opt.textContent = nome;
+                        el.appendChild(opt);
+                    });
+                }
+            });
         })
-        .catch(err => console.error("Erro ao carregar romaneios:", err));
+        .catch(err => console.error("Erro nas transportadoras:", err));
+};
+
 
     // 2. CARREGAR TRANSPORTADORAS (Nova lógica para Login e Cadastro)
     fetch(urlSheets + "?action=getTransportadoras")
