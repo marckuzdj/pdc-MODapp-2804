@@ -211,34 +211,45 @@
     const somErro = new Audio('https://mixkit.co');
 
 window.onload = function() {
-    // URL do seu script (aquela que termina em /exec)
-    const urlApi = "SUA_URL_DO_APPS_SCRIPT_AQUI"; 
-
-    fetch(urlApi + "?action=getTransportadoras")
-    .then(response => {
-        if (!response.ok) throw new Error('Erro na rede');
-        return response.json();
-    })
-    .then(lista => {
-        const selects = ['loginTransportadora', 'cadTransp'];
-        
-        selects.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                // Limpa e adiciona o item padrão
-                el.innerHTML = '<option value="">Selecione a Transportadora</option>';
-                
-                // Preenche com os dados do Google
-                lista.forEach(item => {
-                    let opt = document.createElement('option');
-                    opt.value = item;
-                    opt.textContent = item;
-                    el.appendChild(opt);
+    // 1. CARREGAR ROMANEIOS (Sua lógica original que já funcionava)
+    fetch(urlSheets + "?action=getRomaneios")
+        .then(res => res.json())
+        .then(data => {
+            dadosCompletos = data; // Salva para uso no app
+            const selectRom = document.getElementById("romaneio");
+            if (selectRom) {
+                selectRom.innerHTML = '<option value="">Selecione o Romaneio</option>';
+                data.forEach(item => {
+                    if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
+                        let opt = document.createElement("option");
+                        opt.value = item.Romaneio;
+                        opt.innerHTML = item.Romaneio;
+                        selectRom.appendChild(opt);
+                    }
                 });
             }
-        });
-    })
-    .catch(error => console.error('Erro ao carregar transportadoras:', error));
+        })
+        .catch(err => console.error("Erro ao carregar romaneios:", err));
+
+    // 2. CARREGAR TRANSPORTADORAS (Nova lógica para Login e Cadastro)
+    fetch(urlSheets + "?action=getTransportadoras")
+        .then(res => res.json())
+        .then(lista => {
+            const IDsParaPreencher = ['loginTransportadora', 'cadTransp'];
+            IDsParaPreencher.forEach(id => {
+                const selectEl = document.getElementById(id);
+                if (selectEl) {
+                    selectEl.innerHTML = '<option value="">Selecione a Transportadora</option>';
+                    lista.forEach(nome => {
+                        let opt = document.createElement('option');
+                        opt.value = nome;
+                        opt.textContent = nome;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            });
+        })
+        .catch(err => console.error("Erro ao carregar transportadoras:", err));
 };
 
     
