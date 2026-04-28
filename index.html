@@ -210,25 +210,37 @@
     const somSucesso = new Audio('https://mixkit.co');
     const somErro = new Audio('https://mixkit.co');
 
-    window.onload = function() {
-        // 1. Carrega os Romaneios (Via Fetch - Sua lógica atual)
-        fetch(urlSheets + "?action=getRomaneios")
-            .then(res => res.json())
-            .then(data => {
-                dadosCompletos = data;
-                const select = document.getElementById("romaneio");
-                select.innerHTML = '<option value="">Selecione o Romaneio</option>';
-    
-                data.forEach(item => {
-                    if (!item.Conferencia || item.Conferencia.toString().trim() === "") {
-                        let opt = document.createElement("option");
-                        opt.value = item.Romaneio;
-                        opt.innerHTML = item.Romaneio;
-                        select.appendChild(opt);
-                    }
+window.onload = function() {
+    // URL do seu script (aquela que termina em /exec)
+    const urlApi = "SUA_URL_DO_APPS_SCRIPT_AQUI"; 
+
+    fetch(urlApi + "?action=getTransportadoras")
+    .then(response => {
+        if (!response.ok) throw new Error('Erro na rede');
+        return response.json();
+    })
+    .then(lista => {
+        const selects = ['loginTransportadora', 'cadTransp'];
+        
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                // Limpa e adiciona o item padrão
+                el.innerHTML = '<option value="">Selecione a Transportadora</option>';
+                
+                // Preenche com os dados do Google
+                lista.forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item;
+                    opt.textContent = item;
+                    el.appendChild(opt);
                 });
-            })
-            .catch(err => console.error("Erro nos romaneios:", err));
+            }
+        });
+    })
+    .catch(error => console.error('Erro ao carregar transportadoras:', error));
+};
+
     
         // 2. Carrega as Transportadoras (Via google.script.run para evitar bloqueio CORS)
         if (typeof google !== 'undefined' && google.script) {
